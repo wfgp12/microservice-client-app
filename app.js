@@ -1,24 +1,23 @@
 const express = require('express');
+const bodyParser = require('body-parser')
+
+const sequelize = require('./config/database');
+const User = require('./models/users')
+
 const app = express();
+app.use(bodyParser.json());
+
 const PORT = process.env.PORT || 3000;
 
-// Ruta de prueba
-app.get('/', (req, res) => {
-    res.send('¡Hola mundo desde mi servicio en Node.js!');
-});
+const userRouter = require('./routes/userRoutes');
+app.use('/user', userRouter);
 
-// Manejador para rutas no encontradas
-app.use((req, res, next) => {
-    res.status(404).send('Ruta no encontrada');
-});
-
-// Manejador de errores
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Algo salió mal en el servidor');
-});
-
-// Iniciar el servidor
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en el puerto ${PORT}`);
-});
+sequelize.sync()
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log('Servidor iniciado en el Puerto ', PORT);
+        })
+    })
+    .catch((err) => {
+        console.error('Error al sincronizar el modelo', err);
+    })
