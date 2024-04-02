@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const bodyParser = require('body-parser')
 
 const sequelize = require('./config/database');
@@ -6,11 +7,12 @@ const User = require('./models/users')
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
 const userRouter = require('./routes/userRoutes');
-app.use('/user', userRouter);
+app.use('/api/user', userRouter);
 
 sequelize.sync()
     .then(() => {
