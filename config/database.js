@@ -1,9 +1,10 @@
 const { Sequelize } = require('sequelize');
 
-const sequelize = new Sequelize('microservicios', 'root', 'root1234', {
-    host: 'localhost',
+const sequelize = new Sequelize(process.env.DB, process.env.DB_USER, process.env.DB_PASSWORD, {
+    host: process.env.DB_HOST,
     dialect: 'mysql',
-    port: 3306
+    port: process.env.DB_PORT,
+    logging: false
 });
 
 module.exports = sequelize;
