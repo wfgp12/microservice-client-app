@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser')
+require('dotenv').config();
 
 const sequelize = require('./config/database');
 const User = require('./models/users')
@@ -17,7 +18,7 @@ app.use('/api/user', userRouter);
 sequelize.sync()
     .then(() => {
         app.listen(PORT, () => {
-            console.log('Servidor iniciado en el Puerto ', PORT);
+            console.log(`Servidor iniciado en  http://localhost:${PORT}`);
         })
     })
     .catch((err) => {
