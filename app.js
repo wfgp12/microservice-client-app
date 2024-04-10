@@ -13,6 +13,10 @@ app.use(cors());
 const PORT = process.env.PORT || 3000;
 
 const userRouter = require('./routes/userRoutes');
+
+app.get('/', (req, res) => {
+    res.send('Hola Mundo')
+})
 app.use('/api/user', userRouter);
 
 sequelize.sync()
