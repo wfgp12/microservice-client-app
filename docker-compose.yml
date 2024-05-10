@@ -16,6 +16,7 @@ services:
       - $DOCKER_DB_PORT:$DB_PORT
   app:
     container_name: microservices-node-back
+    restart: unless-stopped
     build: .
     depends_on:
       - mysqldb
@@ -23,3 +24,5 @@ services:
       - mysqldb
     ports:
       - 3000:3000
+    volumes:
+      - .:/app
