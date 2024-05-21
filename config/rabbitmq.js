@@ -4,17 +4,20 @@ let channel = null;
 let connection = null;
 
 const connectRabbitMQ = () => {
-    amqp.connect(process.env.RABBITMQ_URL, (error0, connection) => {
-        if (error0) {
-            throw error0;
-        }
-        connection = connection;
-        connection.createChannel((error1, ch) => {
-            if (error1) {
-                throw error1;
+    return new Promise((resolve, reject) => {
+        amqp.connect(process.env.RABBITMQ_URL, (error0, conn) => {
+            if (error0) {
+                reject(error0);
             }
-            channel = ch;
-            console.log('Connected to RabbitMQ');
+            connection = conn;
+            connection.createChannel((error1, ch) => {
+                if (error1) {
+                    reject(error1);
+                }
+                channel = ch;
+                console.log('Connected to RabbitMQ');
+                resolve();
+            });
         });
     });
 };
@@ -26,30 +29,37 @@ const getChannel = () => {
     return channel;
 };
 
-const closeRabbitMQ = () => {
-    if (channel) {
-        channel.close((err) => {
-            if (err) {
-                console.error('Error closing RabbitMQ channel', err);
-            } else {
-                console.log('RabbitMQ channel closed');
-            }
-        });
-    }
-    if (connection) {
-        connection.close((err) => {
-            if (err) {
-                console.error('Error closing RabbitMQ connection', err);
-            } else {
-                console.log('RabbitMQ connection closed');
-            }
-        });
+const closeRabbitMQ = async () => {
+    try {
+        console.log('Closing RabbitMQ connection and channel...');
+        if (channel) {
+            await channel.close((err) => {
+                if (err) {
+                    throw err;
+                } else {
+                    channel = null;
+                    console.log('RabbitMQ channel closed');
+                }
+            });
+        }
+        if (connection) {
+            await connection.close((err) => {
+                if (err) {
+                    throw err;
+                } else {
+                    connection = null
+                    console.log('RabbitMQ connection closed');
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error closing RabbitMQ connection:', err);
     }
 };
 
-// process.on('exit', (code) => {
-//     closeRabbitMQ();
-//     console.log(`About to exit with code: ${code}`);
-// });
+process.on('exit', (code) => {
+    closeRabbitMQ();
+    console.log(`About to exit with code: ${code}`);
+});
 
 module.exports = { connectRabbitMQ, getChannel, closeRabbitMQ };

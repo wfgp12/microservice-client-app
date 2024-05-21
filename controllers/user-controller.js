@@ -28,7 +28,8 @@ module.exports = {
             const channel = getChannel();
             channel.sendToQueue('loyaltyPointsQueue', Buffer.from(JSON.stringify({
                 description: 'userRegistered',
-                user: user
+                user: user,
+                points: 500
             })));
 
             res.status(201).json(successResponse(user));

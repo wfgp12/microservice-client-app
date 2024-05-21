@@ -20,8 +20,8 @@ app.get('/', (req, res) => {
 app.use('/api/user', userRouter);
 
 sequelize.sync()
-    .then(() => {
-        connectRabbitMQ()
+    .then(async() => {
+        await connectRabbitMQ()
         app.listen(PORT, () => {
             console.log(`Servidor iniciado en  http://localhost:${PORT}`);
         })
@@ -30,12 +30,12 @@ sequelize.sync()
         console.error('Error al sincronizar el modelo', err);
     })
 
-// process.on('SIGINT', () => {
-//     closeRabbitMQ();
-//     process.exit();
-// });
+process.on('SIGINT', () => {
+    closeRabbitMQ();
+    process.exit();
+});
 
-// process.on('SIGTERM', () => {
-//     closeRabbitMQ();
-//     process.exit();
-// });
+process.on('SIGTERM', () => {
+    closeRabbitMQ();
+    process.exit();
+});
