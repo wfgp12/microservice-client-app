@@ -8,12 +8,12 @@ const validateToken = [
         .custom(async (value, { req }) => {
             const token = value.split(' ')[1];
             const decodedToken = verifyToken(token);
-            
+
             if (!decodedToken) {
                 throw new Error('Token de sesión inválido');
             }
             try {
-                req.body.user = await findUserService({ id: decodedToken.userId });
+                req.body.user = await findUserService({ id: decodedToken.userId }, { exclude: ['password', 'createdAt', 'updatedAt'] });
                 return true;
             } catch (error) {
                 throw new Error('Token de sesión inválido');

@@ -1,9 +1,10 @@
-const { 
-    userCreateService, 
-    findAllUserService, 
-    findUserService, 
-    updateUserService, 
-    deleteUserService 
+const { getChannel } = require("../config/rabbitmq");
+const {
+    userCreateService,
+    findAllUserService,
+    findUserService,
+    updateUserService,
+    deleteUserService
 } = require("../services/user-service");
 
 const { generateToken } = require("../utils/auth-utils");
@@ -23,6 +24,13 @@ module.exports = {
                 phoneNumber,
                 password: encryptPassword
             })
+
+            const channel = getChannel();
+            channel.sendToQueue('loyaltyPointsQueue', Buffer.from(JSON.stringify({
+                description: 'userRegistered',
+                user: user
+            })));
+
             res.status(201).json(successResponse(user));
         } catch (error) {
             res.status(500).json(errorResponse(error.message, 500));
@@ -41,7 +49,17 @@ module.exports = {
 
             const token = generateToken({ userId: userWithoutPsw.id });
 
-            res.status(201).json(successResponse({ userWithoutPsw, token }));
+            res.status(201).json(successResponse({ user: userWithoutPsw, token }));
+        } catch (error) {
+            console.log(error);
+            res.status(500).json(errorResponse(error.message, 500));
+        }
+    },
+    validateTokenController: async (req, res) => {
+        try {
+            const { user } = req.body;
+
+            res.status(201).json(successResponse({ user }));
         } catch (error) {
             res.status(500).json(errorResponse(error.message, 500));
         }
@@ -49,7 +67,7 @@ module.exports = {
     finAllUSerController: async (req, res) => {
         try {
             const users = await findAllUserService();
-            
+
             res.status(201).json(successResponse(user));
         } catch (error) {
             res.status(500).json(errorResponse(error.message, 500));
@@ -71,13 +89,13 @@ module.exports = {
         try {
             const { id } = req.params;
             const { name, lastName, email, phoneNumber } = req.body;
-            
+
             const [updatedCount] = await updateUserService({ name, email, lastName, phoneNumber }, { id })
-            
+
             if (updatedCount === 0) {
                 return res.status(404).json({ message: 'User not found' }); // Not Found
             }
-            const updatedUser = await findUserService({id}, {exclude:['password', 'createdAt', 'updatedAt']});
+            const updatedUser = await findUserService({ id }, { exclude: ['password', 'createdAt', 'updatedAt'] });
             res.status(201).json(successResponse(updatedUser));
         } catch (error) {
             res.status(500).json(errorResponse(error.message, 500));
@@ -88,9 +106,9 @@ module.exports = {
             const { id } = req.query;
             const deletedCount = deleteUserService(id);
             if (deletedCount === 0) {
-                return res.status(404).json(errorResponse('User not found', 404)); 
+                return res.status(404).json(errorResponse('User not found', 404));
             }
-            res.status(204).json(successResponse(true)); 
+            res.status(204).json(successResponse(true));
         } catch (error) {
             res.status(500).json(errorResponse(error.message, 500));
         }
