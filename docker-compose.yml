@@ -26,3 +26,7 @@ services:
       - 3000:3000
     volumes:
       - .:/app
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080

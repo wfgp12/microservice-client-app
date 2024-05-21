@@ -8,7 +8,8 @@ const {
     finAllUSerController, 
     findUserController, 
     updateUserController, 
-    deleteUserController 
+    deleteUserController, 
+    validateTokenController
 } = require('../controllers/user-controller');
 
 const { createUserValidator, loginValidator, updateUserValidator } = require('../validator/user-validator');
@@ -24,6 +25,12 @@ router.post('/login', [
     loginValidator,
     handleErrorsValidate
 ], loginController);
+
+
+router.post('/validate-token', [
+    validateToken,
+    handleErrorsValidate
+], validateTokenController);
 
 router.get('/', [
     validateToken,
